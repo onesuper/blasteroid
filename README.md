@@ -8,7 +8,8 @@ See Howtos for installing Allegro 5.0: http://wiki.allegro.cc/index.php?title=Al
 
 The Organization of the code:
 
-* asteroid.c
-* bast.c
-* spaceship.c
-* blastroids.c
+* asteroid.c: main enemies
+* bast.c: a.k.a. bullet
+* spaceship.c: our hero
+* blastroids.c: game core
+* test_collision.c: used to verify the collison function of the game. 

@@ -17,10 +17,7 @@ typedef struct {
 
 
 void bbox_draw(Bbox b);
-int bbox_collide(Bbox b1, Bbox b2);
-
-
-
+int bbox_overlap(Bbox b1, Bbox b2);
 
 
 

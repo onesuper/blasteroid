@@ -1,7 +1,11 @@
 
-#define MAX_BLAST_NUM 20
+
 #include "spaceship.h"
 #include "asteroid.h"
+#include "bbox.h"
+
+#define MAX_BLAST_NUM 20
+
 
 #ifndef BLAST_H_
 #define BLAST_H_
@@ -13,8 +17,7 @@ typedef struct {
     float speed;
     int live;
     ALLEGRO_COLOR color;
-    float w;               /* bounding box */
-    float h; 
+    Bbox bbox;
 } Blast;
 
 

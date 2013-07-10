@@ -1,9 +1,9 @@
 CXX=gcc
-CFLAGS=-Wall
-LDFLAGS=-L/usr/lib -lallegro -lallegro_primitives
+CFLAGS=-Wall -g
+LDFLAGS=-L/usr/lib -lallegro -lallegro_primitives -lallegro_audio -lallegro_acodec -lallegro_main 
 INCLUDE=-I. -I/usr/include/allegro5 
 
-OBJS=blasteroids.o spaceship.o blast.o asteroid.o
+OBJS=blasteroids.o spaceship.o blast.o asteroid.o bbox.o utils.o
 OUT=blasteroid
 
 all: blasteroid
@@ -25,3 +25,9 @@ blast.o: blast.c
 
 asteroid.o: asteroid.c
 	$(CXX) -c asteroid.c $(CFLAGS)
+
+bbox.o: bbox.c
+	$(CXX) -c bbox.c $(CFLAGS)
+
+utils.o: utils.c
+	$(CXX) -c utils.c $(CFLAGS)

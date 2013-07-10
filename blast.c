@@ -1,7 +1,6 @@
 
 #include <math.h>
 #include <allegro5/allegro_primitives.h>
-#include "spaceship.h"
 #include "blast.h"
 
 
@@ -56,3 +55,30 @@ void blasts_move(Blast b[], int size, int width, int height) {
         }
     }
 }
+
+#if 0
+void blasts_collide(Blast b[], int b_size, Asteroid a[], int a_size) {
+    int i, j;
+    for (i = 0; i < b_size; i ++) {
+        if (b[i].live)                   /*  if blast is alive */
+        {                 
+            for (j = 0; j < a_size; j++) 
+            {
+                if (a[i].live)           /* if asteroid is alive */ 
+                {         
+                    if (b[i].sx > a[j].sx - a[j].boundx &&
+                        b[i].sx < a[j].sx + a[j].boundx &&
+                        b[i].sy > a[j].sy - a[j].boundy &&
+                        b[i].sy < a[j].sy + a[j].boundy)
+                    {
+                        
+                        a[i].live = 0;
+                        b[i].live = 0;   /* both are dead */
+                        
+                    }
+                }
+            }
+        }
+    }
+}
+#endif

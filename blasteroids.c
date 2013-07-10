@@ -7,9 +7,12 @@
 #include <stdio.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_acodec.h>
 #include "spaceship.h"
-#include "blast.h"
 #include "asteroid.h"
+#include "blast.h"
+#include "bbox.h"
 
 
 #define FPS 60
@@ -21,11 +24,18 @@ int keys[5] = {0, 0, 0, 0, 0};
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE};
 
 
+
 int main(int argc, char **argv) {
 
+
+    /* Game engine resources */
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_EVENT_QUEUE *event_queue = NULL;
     ALLEGRO_TIMER *timer = NULL;
+
+    /* Sound resources */
+    ALLEGRO_SAMPLE *sound_fire = NULL;
+
 
     int redraw = 1;
     int doexit = 0;
@@ -36,24 +46,39 @@ int main(int argc, char **argv) {
     Blast blasts[MAX_BLAST_NUM];
     Asteroid asteroids[MAX_ASTEROID_NUM];
 
-    
+
+
+
     /* Init Allegro */
     if (!al_init()) {
-        fprintf(stderr, "fail to initialize allegro!\n");
+        fprintf(stderr, "failed to initialize allegro!\n");
         return -1;
     }
 
 
-    /* For drawing lines, triangles... */
+    /*******************************************************************
+     *                         Addons
+     ******************************************************************/    
     if (!al_init_primitives_addon()) {
-        fprintf(stderr, "fail to initialize primitives addon!\n");
+        fprintf(stderr, "failed to initialize primitives addon!\n");
+        return -1;
+    }
+    
+    if(!al_init_acodec_addon()) {
+        fprintf(stderr, "failed to initialize audio codecs!\n");
         return -1;
     }
 
 
     /* Install keyboard */
     if (!al_install_keyboard()) {
-        fprintf(stderr, "fail to install keyboard!\n");
+        fprintf(stderr, "failed to install keyboard!\n");
+        return -1;
+    }
+
+    /* Install Audio */
+    if (!al_install_audio()){
+        fprintf(stderr, "failed to install audio!\n");
         return -1;
     }
 
@@ -61,7 +86,7 @@ int main(int argc, char **argv) {
     /* Get a timer */
     timer = al_create_timer(1.0 / FPS);
     if (!timer) {
-        fprintf(stderr, "fail to create a timer!\n");
+        fprintf(stderr, "failed to create a timer!\n");
         return -1;
     }
 
@@ -70,7 +95,7 @@ int main(int argc, char **argv) {
     display = al_create_display(WIDTH, HEIGHT);
     if(!display) {
         fprintf(stderr, "failed to create display!\n");
-        al_destroy_timer(timer);  /* rollback */
+        al_destroy_timer(timer);        /* rollback */
         return -1;
     }
 
@@ -95,14 +120,29 @@ int main(int argc, char **argv) {
     al_clear_to_color(al_map_rgb(0, 0, 0));
     al_flip_display();
   
+    /*
+
+    if (!al_reserve_samples(16)){
+        fprintf(stderr, "failed to reserve samples!\n");
+        return -1;
+    }
+    */
+    sound_fire = al_load_sample("sound/fire.wav"); 
+    if (!sound_fire){
+        fprintf(stderr, "fire.wav not loaded!\n" ); 
+        return -1;
+    }
+
 
     /* Initialize game characters here */
     ship_init(&ship, WIDTH/2, HEIGHT/2);
     blasts_init(blasts, MAX_BLAST_NUM);
     asteroids_init(asteroids, MAX_ASTEROID_NUM);
 
+
     /* kick off the timer */
     al_start_timer(timer);
+
 
     while (!doexit) 
     {
@@ -133,7 +173,10 @@ int main(int argc, char **argv) {
             blasts_move(blasts, MAX_BLAST_NUM, WIDTH, HEIGHT);
             asteroids_appear(asteroids, MAX_ASTEROID_NUM, WIDTH, HEIGHT);
             asteroids_move(asteroids, MAX_ASTEROID_NUM, WIDTH, HEIGHT);
-                    
+            //asteroids_collide(asteroids, MAX_ASTEROID_NUM, &ship);
+            //blasts_collide(blasts, MAX_BLAST_NUM, asteroids, MAX_ASTEROID_NUM);                    
+
+            
         } else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {  /* close */
 
             doexit = 1;
@@ -142,7 +185,7 @@ int main(int argc, char **argv) {
             switch(event.keyboard.keycode) {
                 case ALLEGRO_KEY_UP:
                     keys[UP] = 1;
-                    ship.accelerating = 1;                 /* accelerating */
+                    ship.accelerating = 1;                   /* accelerating */
                     break;
                 case ALLEGRO_KEY_DOWN:
                     keys[DOWN] = 1;
@@ -155,8 +198,10 @@ int main(int argc, char **argv) {
                     break;
                 case ALLEGRO_KEY_SPACE:
                     keys[SPACE] = 1;
-                    blasts_fire(blasts, MAX_BLAST_NUM, &ship);   /* fire up */
-                    break;
+                    blasts_fire(blasts, MAX_BLAST_NUM, &ship);    /* fire! */
+
+                    al_play_sample(sound_fire, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+    
             }
         } else if (event.type == ALLEGRO_EVENT_KEY_UP) {
             switch(event.keyboard.keycode) {
@@ -185,9 +230,16 @@ int main(int argc, char **argv) {
             redraw = 0;                      
 
             /* drawing area */
-            ship_draw(&ship);
+            ship_draw(ship);
             blasts_draw(blasts, MAX_BLAST_NUM);
             asteroids_draw(asteroids, MAX_ASTEROID_NUM);
+            /* delete them later */
+            bbox_draw(ship.bbox);
+            int i;
+            for (i = 0; i < MAX_ASTEROID_NUM; i++) {
+                bbox_draw(asteroids[i].bbox);
+            }
+            
 
             al_flip_display();
             al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -196,6 +248,7 @@ int main(int argc, char **argv) {
 
 
     /* Destroy everything here */
+    //al_destroy_sample(sound_fire);
     al_destroy_timer(timer);
     al_destroy_display(display);
     al_destroy_event_queue(event_queue);

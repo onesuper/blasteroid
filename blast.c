@@ -1,22 +1,37 @@
+/*
+ * blast.c - the bullet
+ *
+ * When the spaceship fire the bullet, the code will need to draw and move
+ * a blast across the screen. If a blast is out of the screen, then it's 
+ * gone.
+ *
+ * By onesuper(onesuperclark@gmail.com)
+ *
+ * You are welcome to use, share, and improve this source code.
+ *
+ */
+
 
 #include <math.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_audio.h>
 #include "blast.h"
 
 
 void blasts_init(Blast b[], int size) {
     int i;
     for (i = 0; i < size; i++) {
-        b[i].speed = 3;
+        b[i].speed = 5;
         b[i].live = 0;        /* all blasts are dead until they are fired */
         b[i].bbox.top = 2;
         b[i].bbox.left = 2;
         b[i].bbox.right = 2;
         b[i].bbox.bottom = 2;
+        b[i].bbox.color = al_map_rgb(255,0,0);
     }
 }
 
-void blasts_fire(Blast b[], int size, Spaceship* s) {
+void blasts_fire(Blast b[], int size, Spaceship* s, ALLEGRO_SAMPLE* fire) {
     int i;
     for (i = 0; i < size; i++) {
         if (!b[i].live) {
@@ -26,7 +41,7 @@ void blasts_fire(Blast b[], int size, Spaceship* s) {
             b[i].live = 1;
             b[i].bbox.center.x = b[i].sx;
             b[i].bbox.center.y = b[i].sy;
-            b[i].bbox.heading = b[i].heading;
+            al_play_sample(fire, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
             break;
         }
     }
@@ -65,29 +80,24 @@ void blasts_draw(Blast b[], int size) {
     }
 }
 
-#if 0
-void blasts_collide(Blast b[], int b_size, Asteroid a[], int a_size) {
+
+void blasts_collide(Blast b[], int b_size, Asteroid a[], int a_size, ALLEGRO_SAMPLE* bang) {
     int i, j;
-    for (i = 0; i < b_size; i ++) {
+    for (i = 0; i < b_size; i++) {
         if (b[i].live)                   /*  if blast is alive */
         {                 
             for (j = 0; j < a_size; j++) 
             {
-                if (a[i].live)           /* if asteroid is alive */ 
+                if (a[j].live)           /* if asteroid is alive */ 
                 {         
-                    if (b[i].sx > a[j].sx - a[j].boundx &&
-                        b[i].sx < a[j].sx + a[j].boundx &&
-                        b[i].sy > a[j].sy - a[j].boundy &&
-                        b[i].sy < a[j].sy + a[j].boundy)
-                    {
-                        
-                        a[i].live = 0;
+                    if (bbox_overlap(a[j].bbox, b[i].bbox))
+                    {                        
+                        a[j].live = 0;
                         b[i].live = 0;   /* both are dead */
-                        
+                        al_play_sample(bang, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
                     }
                 }
             }
         }
     }
 }
-#endif

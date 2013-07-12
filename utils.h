@@ -1,4 +1,12 @@
-
+/*
+ * utils.h
+ *
+ *
+ * By onesuper(onesuperclark@gmail.com)
+ *
+ * You are welcome to use, share, and improve this source code.
+ *
+ */
 
 #ifndef UTILS_H_
 #define UTILS_H_

@@ -1,6 +1,17 @@
+/*
+ * spaceship.c - the hero of our game
+ *
+ *
+ * By onesuper(onesuperclark@gmail.com)
+ *
+ * You are welcome to use, share, and improve this source code.
+ *
+ */
+
 
 #include <math.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_audio.h>
 #include "spaceship.h"
 
 
@@ -19,6 +30,7 @@ void ship_init(Spaceship* s, int x, int y) {
     s->bbox.top= 12;
     s->bbox.bottom =10;
     s->bbox.heading = 0;
+    s->bbox.color = al_map_rgb(255, 255, 255);  
 }
 
 void ship_draw(Spaceship s) {
@@ -63,10 +75,11 @@ void ship_move(Spaceship* s, int width, int height) {
     s->bbox.heading = s->heading;
 }
 
-void ship_acc(Spaceship* s) {
+void ship_acc(Spaceship* s, ALLEGRO_SAMPLE* thrust) {
     s->speed += SHIP_SPEEDUP;
     if (s->speed > MAX_SHIP_SPEED)
         s->speed = MAX_SHIP_SPEED;
+    al_play_sample(thrust, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 }
 
 

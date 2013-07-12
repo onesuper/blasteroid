@@ -1,3 +1,12 @@
+/*
+ * asteroid.h - 
+ *
+ *
+ * By onesuper(onesuperclark@gmail.com)
+ *
+ * You are welcome to use, share, and improve this source code.
+ *
+ */
 
 #include "spaceship.h"
 
@@ -5,6 +14,7 @@
 #define ASTEROID_H_
 
 #define MAX_ASTEROID_NUM 4
+
 
 typedef struct {
     float sx;
@@ -25,6 +35,6 @@ void asteroids_init(Asteroid a[], int size);
 void asteroids_appear(Asteroid a[], int size, int width, int height);
 void asteroids_move(Asteroid a[], int size, int width, int height);
 void asteroids_draw(Asteroid a[], int size);
-void asteroids_collide(Asteroid a[], int size, Spaceship* s);
+void asteroids_collide(Asteroid a[], int size, Spaceship* s, ALLEGRO_SAMPLE* bang);
 
 #endif

@@ -1,8 +1,19 @@
+/*
+ * bbox.c - bounding box 
+ * 
+ * Bounding box(bbox) is rectangle wrapping around a game character.
+ * When two bounding boxes overlap, then there exists a collision.
+ *
+ * By onesuper(onesuperclark@gmail.com)
+ *
+ * You are welcome to use, share, and improve this source code.
+ *
+ */
+
+
 
 #include <allegro5/allegro_primitives.h>
 #include "bbox.h"
-
-
 
 
 int axis_overlap(Point A_LT, Point A_RT, Point A_LB, Point A_RB,
@@ -39,10 +50,13 @@ int axis_overlap(Point A_LT, Point A_RT, Point A_LB, Point A_RB,
     float max_B = max_in4(b1, b2, b3, b4);
     float min_B = min_in4(b1, b2, b3, b4);
 
+
     if (min_B > max_A || min_A > max_B) 
         return 0;      /* None Overlap */
     else 
         return 1;
+
+
 
 }
 
@@ -120,16 +134,33 @@ int bbox_overlap(Bbox A, Bbox B) {
 
 
 void bbox_draw(Bbox b) {
-        
-    ALLEGRO_TRANSFORM transform;
-    al_identity_transform(&transform);
-    al_rotate_transform(&transform, b.heading);
-    al_translate_transform(&transform, b.center.x, b.center.y);
-    al_use_transform(&transform);
-                
-    al_draw_line( -b.left,    -b.top,  -b.left,  b.bottom, al_map_rgb(255, 0, 0), 1.0f);
-    al_draw_line( -b.left,    -b.top,  b.right,   -b.top, al_map_rgb(255, 0, 0), 1.0f);
-    al_draw_line( -b.left,  b.bottom,  b.right, b.bottom, al_map_rgb(255, 0, 0), 1.0f);
-    al_draw_line( b.right,    -b.top,  b.right, b.bottom, al_map_rgb(255, 0, 0), 1.0f);
+
+    ALLEGRO_TRANSFORM transform1;
+    al_identity_transform(&transform1);
+    al_rotate_transform(&transform1, 0);
+    al_translate_transform(&transform1, 0, 0);
+    al_use_transform(&transform1);
+
+    Point LT, LB, RT, RB;
     
+    LT.x = b.center.x - b.left;
+    LT.y = b.center.y - b.top;   
+    LB.x = b.center.x - b.left;
+    LB.y = b.center.y + b.bottom;
+    RT.x = b.center.x + b.right;
+    RT.y = b.center.y - b.top;   
+    RB.x = b.center.x + b.right;
+    RB.y = b.center.y + b.bottom;
+    
+    point_rotate(&LT, b.center, b.heading);
+    point_rotate(&LB, b.center, b.heading);
+    point_rotate(&RT, b.center, b.heading);
+    point_rotate(&RB, b.center, b.heading);
+
+    al_draw_line(LT.x, LT.y, RT.x, RT.y, b.color, 1.0f);
+    al_draw_line(LT.x, LT.y, LB.x, LB.y, b.color, 1.0f);
+    al_draw_line(RT.x, RT.y, RB.x, RB.y, b.color, 1.0f);
+    al_draw_line(LB.x, LB.y, RB.x, RB.y, b.color, 1.0f);
+
+
 }

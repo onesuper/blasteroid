@@ -1,11 +1,22 @@
-
+/*
+ * test_collision.c - verify the correctness of the collision test module
+ *
+ * It will create two bounding boxes on the screen. One of them can be 
+ * moved around(left/right/up/down). Both of them can be rotated 
+ * clockwise(W/X) or anticlockwise(Q/Z). 
+ *
+ * By onesuper(onesuperclark@gmail.com)
+ *
+ * You are welcome to use, share, and improve this source code.
+ *
+ */
 
 
 #include <stdio.h>
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include "bbox.h"
-#include "utils.h"
+
 
 #define FPS 60
 #define WIDTH 640
@@ -14,8 +25,8 @@
 
 
 /* 5 keys for controlling the spaceship */
-int keys[5] = {0, 0, 0, 0, 0};
-enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE};
+int keys[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+enum KEYS {UP, DOWN, LEFT, RIGHT, Q, W, Z, X};
 
 
 
@@ -37,19 +48,29 @@ int main(int argc, char **argv) {
     b1.center.y = HEIGHT / 2;
     b2.center.x = b1.center.x + 100;
     b2.center.y = b1.center.y + 100;
-    b1.heading = 1.0;
-    b2.heading = 2.0;
-    b1.left = b2.left = 20;
-    b1.right = b2.right = 20;
-    b1.top = b2.top = 30;
-    b1.bottom = b2.bottom = 30;
-    
+
+    b1.heading = 0.0;
+    b2.heading = 0.0;
+
+    b1.left = 2;
+    b1.right = 2;
+    b1.top = 3;
+    b1.bottom = 2;
+
+    b2.left = 20;
+    b2.right = 20;
+    b2.top = 30;
+    b2.bottom = 30;
 
     /* Init Allegro */
     if (!al_init()) {
         fprintf(stderr, "failed to initialize allegro!\n");
         return -1;
     }
+    
+    /* NOTE: it's necessary to call al_map_rgb after al_init */
+    b1.color = al_map_rgb(230, 230, 230);
+    b2.color = al_map_rgb(230, 230, 230);
 
 
     /*******************************************************************
@@ -127,13 +148,21 @@ int main(int argc, char **argv) {
 
             /* move the b1 around */
 			if(keys[UP])
-			    b1.center.y -= 2;
+			    b1.center.y -= 5;
 			if(keys[DOWN])
-				b1.center.y += 2;
+				b1.center.y += 5;
 			if(keys[LEFT])
-				b1.center.x -= 2;
+				b1.center.x -= 5;
 			if(keys[RIGHT])
-				b1.center.x += 2;         
+				b1.center.x += 5;         
+            if(keys[Q])
+				b1.heading -= 0.05;  
+            if(keys[W])
+				b1.heading += 0.05;  
+            if(keys[Z])
+				b2.heading -= 0.05;  
+            if(keys[X])
+				b2.heading += 0.05;  
 
             /* determine overlap */
             overlap = bbox_overlap(b1, b2);
@@ -157,8 +186,18 @@ int main(int argc, char **argv) {
                 case ALLEGRO_KEY_LEFT:
                     keys[LEFT] = 1;
                     break;
-                case ALLEGRO_KEY_SPACE:
-                    keys[SPACE] = 1;
+                case ALLEGRO_KEY_Z:
+                    keys[Z] = 1;
+                    break;
+                case ALLEGRO_KEY_X:
+                    keys[X] = 1;
+                    break;
+                case ALLEGRO_KEY_Q:
+                    keys[Q] = 1;
+                    break;
+                case ALLEGRO_KEY_W:
+                    keys[W] = 1;
+                    break;
             }
         } else if (event.type == ALLEGRO_EVENT_KEY_UP) {
             switch(event.keyboard.keycode) {
@@ -174,8 +213,17 @@ int main(int argc, char **argv) {
                 case ALLEGRO_KEY_LEFT:
                     keys[LEFT] = 0;
                     break;
-                case ALLEGRO_KEY_SPACE:
-                    keys[SPACE] = 0;
+                case ALLEGRO_KEY_Z:
+                    keys[Z] = 0;
+                    break;
+                case ALLEGRO_KEY_X:
+                    keys[X] = 0;
+                    break;
+                case ALLEGRO_KEY_Q:
+                    keys[Q] = 0;
+                    break;
+                case ALLEGRO_KEY_W:
+                    keys[W] = 0;
                     break;
             }
         }
@@ -188,12 +236,13 @@ int main(int argc, char **argv) {
             /* drawing area */
             bbox_draw(b1);
             bbox_draw(b2);
+
             if (overlap) {
                 ALLEGRO_TRANSFORM transform;
                 al_identity_transform(&transform);
                 al_translate_transform(&transform, 20, 20);
                 al_use_transform(&transform);
-                al_draw_filled_circle(0, 0, 20, al_map_rgb(255, 255, 255));
+                al_draw_filled_circle(0, 0, 20, al_map_rgb(255, 0, 0));
             }
 
             al_flip_display();

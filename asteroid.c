@@ -1,7 +1,15 @@
-
+/*
+ * asteroid.c - the big enemies in the game
+ * 
+ * By onesuper(onesuperclark@gmail.com)
+ *
+ * You are welcome to use, share, and improve this source code.
+ *
+ */
 
 #include <math.h>
 #include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_audio.h>
 #include "asteroid.h"
 
 
@@ -9,7 +17,7 @@ void asteroids_init(Asteroid a[], int size) {
     int i;
     for (i = 0; i < size; i++) {
         a[i].live = 0;
-        a[i].speed = 0.9;
+        a[i].speed = 0.5;
         a[i].rot_velocity = 0.01;
         a[i].twist = 0;        
         a[i].color = al_map_rgb(220,220,220);
@@ -18,6 +26,7 @@ void asteroids_init(Asteroid a[], int size) {
         a[i].bbox.left = 25;
         a[i].bbox.right = 20;
         a[i].bbox.heading = 0;
+        a[i].bbox.color = al_map_rgb(255,255,255);
     }
 }
 
@@ -34,10 +43,10 @@ void asteroids_appear(Asteroid a[], int size, int width, int height) {
             a[i].sy = 30 + rand() % (height -60);
             a[i].bbox.center.x = a[i].sx;
             a[i].bbox.center.y = a[i].sy;  
-            a[i].bbox.top *= a[i].scale;   
-            a[i].bbox.left *= a[i].scale;
-            a[i].bbox.right *= a[i].scale;
-            a[i].bbox.bottom *= a[i].scale;
+            a[i].bbox.top = 20 * a[i].scale;   
+            a[i].bbox.left = 25 * a[i].scale;
+            a[i].bbox.right = 20 * a[i].scale;
+            a[i].bbox.bottom = 20 * a[i].scale;
             a[i].bbox.heading = a[i].heading;
             break;                
         }        
@@ -101,20 +110,16 @@ void asteroids_draw(Asteroid a[], int size) {
 
 }
 
-/*
-void asteroids_collide(Asteroid a[], int size, Spaceship* s) {
+
+void asteroids_collide(Asteroid a[], int size, Spaceship* s, ALLEGRO_SAMPLE* bang) {
     int i;
     for (i = 0; i < size; i++) {
-        if (a[i].sx - a[i].boundx < s->sx + s->boundx &&
-            a[i].sx + a[i].boundx > s->sx - s->boundx &&
-            a[i].sy - a[i].boundy < s->sy + s->boundy &&
-            a[i].sy + a[i].boundy > s->sy - s->boundy) {
-            
+        if (bbox_overlap(a[i].bbox, s->bbox)) {
             a[i].live = 0;
-            
-        }
-        
+            s->lives--;
+            al_play_sample(bang, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+        }                      
+ 
     }
-
 }
-*/
+

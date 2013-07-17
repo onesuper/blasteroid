@@ -16,25 +16,29 @@
 #define MAX_ASTEROID_NUM 4
 
 
-typedef struct {
+
+typedef struct asteroid_t{    
     float sx;
     float sy;
+    int type;
     float heading;
     float twist;
     float speed;
     float rot_velocity;
     float scale;
-    int live;
     ALLEGRO_COLOR color;    
     Bbox bbox;
+    struct asteroid_t *next;
 } Asteroid;
 
 
 
-void asteroids_init(Asteroid a[], int size);
-void asteroids_appear(Asteroid a[], int size, int width, int height);
-void asteroids_move(Asteroid a[], int size, int width, int height);
-void asteroids_draw(Asteroid a[], int size);
-void asteroids_collide(Asteroid a[], int size, Spaceship* s, ALLEGRO_SAMPLE* bang);
+Asteroid *asteroid_init(void);
+Asteroid *asteroid_create(void);
+void asteroid_append(Asteroid *a, int n);
+void asteroid_destroy(Asteroid *a);
+void asteroid_move(Asteroid *a);
+void asteroid_draw(Asteroid *a);
+void asteroid_collide(Asteroid *a, Spaceship *s, ALLEGRO_SAMPLE *bang, int *asteroid_num);
 
 #endif

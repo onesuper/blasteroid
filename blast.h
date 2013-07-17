@@ -30,11 +30,12 @@ typedef struct {
 
 
 
-void blasts_init(Blast b[], int size);
-void blasts_draw(Blast b[], int size);
-void blasts_fire(Blast b[], int size, Spaceship* s, ALLEGRO_SAMPLE* bang);
-void blasts_move(Blast b[], int size, int width, int height);
-void blasts_collide(Blast b[], int sizeB, Asteroid a[], int sizeA, ALLEGRO_SAMPLE* bang);
+void blast_init(Blast b[], int size);
+void blast_draw(Blast b[], int size);
+void blast_fire(Blast b[], int size, Spaceship *s, ALLEGRO_SAMPLE *bang);
+void blast_move(Blast b[], int size);
+void blast_collide(Blast b[], int sizeB, Asteroid *a,
+                    ALLEGRO_SAMPLE *bang, int *score, int *asteroid_num);
 
 
 #endif

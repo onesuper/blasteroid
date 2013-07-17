@@ -22,12 +22,10 @@
 #include "asteroid.h"
 #include "blast.h"
 #include "bbox.h"
+#include "misc.h"
 
 
 #define FPS 60
-#define WIDTH 640
-#define HEIGHT 480
-
 
 /* 5 keys for controlling the spaceship */
 int keys[5] = {0, 0, 0, 0, 0};
@@ -37,39 +35,27 @@ enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE};
 int main(int argc, char **argv) {
 
 
-    /* Game engine resources */
+    /* Game resources/variables */
     ALLEGRO_DISPLAY *display = NULL;
     ALLEGRO_EVENT_QUEUE *event_queue = NULL;
     ALLEGRO_TIMER *timer = NULL;
-
-    /* Sound resources */
     ALLEGRO_SAMPLE *sound_fire = NULL;
     ALLEGRO_SAMPLE *sound_bang = NULL;
     ALLEGRO_SAMPLE *sound_thrust = NULL;
-
-
     int redraw = 1;
     int doexit = 0;
+    int score = 0;
+    int asteroid_num = 4;
 
 
-    /* Gasme characters */
-    Spaceship ship;
-    Blast blasts[MAX_BLAST_NUM];
-    Asteroid asteroids[MAX_ASTEROID_NUM];
-
-
-
-
-    /* Init Allegro */
+    /*******************************************************************
+     *            Init & Install Audio/keyboard/Addons
+     ******************************************************************/ 
     if (!al_init()) {
         fprintf(stderr, "failed to initialize allegro!\n");
         return -1;
     }
 
-
-    /*******************************************************************
-     *            Install Audio/keyboard/Addons
-     ******************************************************************/    
     if (!al_init_primitives_addon()) {
         fprintf(stderr, "failed to initialize primitives addon!\n");
         return -1;
@@ -80,21 +66,21 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-
     /* Install keyboard */
     if (!al_install_keyboard()) {
         fprintf(stderr, "failed to install keyboard!\n");
         return -1;
     }
 
-    /* Install Audio */
+
+    /***********************************************************************
+     *   Game audio
+     **********************************************************************/
     if (!al_install_audio()){
         fprintf(stderr, "failed to install audio!\n");
         return -1;
     }
-
     
-    /* Audo loading */
     if (!al_reserve_samples(3)){
         fprintf(stderr, "failed to reserve samples!\n");
         return -1;
@@ -105,6 +91,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "fire.wav not loaded!\n" ); 
         return -1;
     }
+
     sound_bang = al_load_sample("sound/bang.wav"); 
     if (!sound_bang){
         fprintf(stderr, "bang.wav not loaded!\n" ); 
@@ -127,7 +114,7 @@ int main(int argc, char **argv) {
 
 
     /* Get a display of WIDTH * HEIGHT */
-    display = al_create_display(WIDTH, HEIGHT);
+    display = al_create_display(SCREEN_WIDTH, SCREEN_HEIGHT);
     if(!display) {
         fprintf(stderr, "failed to create display!\n");
         al_destroy_timer(timer);        /* rollback */
@@ -156,10 +143,16 @@ int main(int argc, char **argv) {
     al_flip_display();
   
 
-    /* Initialize game characters here */
-    ship_init(&ship, WIDTH/2, HEIGHT/2);
-    blasts_init(blasts, MAX_BLAST_NUM);
-    asteroids_init(asteroids, MAX_ASTEROID_NUM);
+    /* Init our game characters here */
+    Spaceship ship;
+    ship_init(&ship);
+
+    Blast blasts_array[MAX_BLAST_NUM];  
+    blast_init(blasts_array, MAX_BLAST_NUM);
+
+    Asteroid *asteroids_list = asteroid_init();
+    asteroid_append(asteroids_list, 4);
+
 
 
     /* kick off the timer */
@@ -196,14 +189,21 @@ int main(int argc, char **argv) {
                 
 
             /* Update anyway */
-            ship_move(&ship, WIDTH, HEIGHT);
-            blasts_move(blasts, MAX_BLAST_NUM, WIDTH, HEIGHT);
-            asteroids_appear(asteroids, MAX_ASTEROID_NUM, WIDTH, HEIGHT);
-            asteroids_move(asteroids, MAX_ASTEROID_NUM, WIDTH, HEIGHT);            
-            asteroids_collide(asteroids, MAX_ASTEROID_NUM, &ship, sound_bang);      
-            blasts_collide(blasts, MAX_BLAST_NUM, asteroids, MAX_ASTEROID_NUM, sound_bang);                    
+            ship_move(&ship);
+            blast_move(blasts_array, MAX_BLAST_NUM);
+            asteroid_move(asteroids_list);            
+            asteroid_collide(asteroids_list, &ship, sound_bang, &asteroid_num);      
+            blast_collide(blasts_array, MAX_BLAST_NUM, asteroids_list, sound_bang, &score, &asteroid_num);                    
 
-            
+            /* Main Game Logic */
+
+            if (asteroid_num == 0) {
+                
+                asteroid_append(asteroids_list, 4);
+                asteroid_num += 4;
+            }
+
+       
         } else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {  /* close */
 
             doexit = 1;
@@ -225,7 +225,7 @@ int main(int argc, char **argv) {
                     break;
                 case ALLEGRO_KEY_SPACE:
                     keys[SPACE] = 1;
-                    blasts_fire(blasts, MAX_BLAST_NUM, &ship, sound_fire);    /* fire! */                    
+                    blast_fire(blasts_array, MAX_BLAST_NUM, &ship, sound_fire);    /* fire! */                    
                     break;
             }
         } else if (event.type == ALLEGRO_EVENT_KEY_UP) {
@@ -255,8 +255,8 @@ int main(int argc, char **argv) {
 
             /* drawing area */
             ship_draw(ship);
-            blasts_draw(blasts, MAX_BLAST_NUM);
-            asteroids_draw(asteroids, MAX_ASTEROID_NUM);
+            blast_draw(blasts_array, MAX_BLAST_NUM);
+            asteroid_draw(asteroids_list);
 #if 0
             /* Bounding Box test, delete later */
             bbox_draw(ship.bbox);
@@ -266,7 +266,7 @@ int main(int argc, char **argv) {
                     bbox_draw(asteroids[i].bbox);
             }
             for (i = 0; i < MAX_BLAST_NUM; i++) {
-                if (blasts[i].live)
+                if (blasts_array[i].live)
                     bbox_draw(blasts[i].bbox);
             }
 #endif
@@ -277,6 +277,7 @@ int main(int argc, char **argv) {
 
 
     /* Destroy everything here */
+    asteroid_destroy(asteroids_list);
     al_destroy_sample(sound_fire);
     al_destroy_timer(timer);
     al_destroy_display(display);

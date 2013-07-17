@@ -20,7 +20,7 @@ typedef struct {
 
 
 
-void point_rotate(Point* p, Point center, float theta);
+void point_rotate(Point *p, Point center, float theta);
 Point project(Point A, Point B);
 float dot_product(Point A, Point B);
 float max_in2(float a, float b);

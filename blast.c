@@ -16,9 +16,9 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_audio.h>
 #include "blast.h"
+#include "misc.h"
 
-
-void blasts_init(Blast b[], int size) {
+void blast_init(Blast b[], int size) {
     int i;
     for (i = 0; i < size; i++) {
         b[i].speed = 5;
@@ -31,7 +31,7 @@ void blasts_init(Blast b[], int size) {
     }
 }
 
-void blasts_fire(Blast b[], int size, Spaceship* s, ALLEGRO_SAMPLE* fire) {
+void blast_fire(Blast b[], int size, Spaceship *s, ALLEGRO_SAMPLE *fire) {
     int i;
     for (i = 0; i < size; i++) {
         if (!b[i].live) {
@@ -48,7 +48,7 @@ void blasts_fire(Blast b[], int size, Spaceship* s, ALLEGRO_SAMPLE* fire) {
 }
 
 
-void blasts_move(Blast b[], int size, int width, int height) {
+void blast_move(Blast b[], int size) {
     int i;
     for (i = 0; i < size; i++) {
         if (b[i].live) {
@@ -58,14 +58,14 @@ void blasts_move(Blast b[], int size, int width, int height) {
             b[i].bbox.center.x = b[i].sx;
             b[i].bbox.center.y = b[i].sy;
             
-            if (b[i].sx > width || b[i].sx < 0 || b[i].sy > height || b[i].sy < 0)
+            if (b[i].sx > SCREEN_WIDTH || b[i].sx < 0 || b[i].sy > SCREEN_HEIGHT || b[i].sy < 0)
                 b[i].live = 0;  // out of screen
         }
     }
 }
 
 
-void blasts_draw(Blast b[], int size) {
+void blast_draw(Blast b[], int size) {
     int i;
     for (i = 0; i < size; i++) {
         if (b[i].live) {
@@ -81,23 +81,45 @@ void blasts_draw(Blast b[], int size) {
 }
 
 
-void blasts_collide(Blast b[], int b_size, Asteroid a[], int a_size, ALLEGRO_SAMPLE* bang) {
-    int i, j;
+void blast_collide(Blast b[], int b_size, Asteroid *a, ALLEGRO_SAMPLE *bang, int *score, int *asteroid_num) {
+
+    Asteroid *prev, *p;
+
+    /* 
+     * go through all the bullets
+     */
+    int i;
     for (i = 0; i < b_size; i++) {
-        if (b[i].live)                   /*  if blast is alive */
-        {                 
-            for (j = 0; j < a_size; j++) 
-            {
-                if (a[j].live)           /* if asteroid is alive */ 
-                {         
-                    if (bbox_overlap(a[j].bbox, b[i].bbox))
-                    {                        
-                        a[j].live = 0;
-                        b[i].live = 0;   /* both are dead */
-                        al_play_sample(bang, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+        if (b[i].live)                   /*  only check the alive blast */
+        {
+            /*
+             * go through the asteroid list
+             */
+            for (prev = a, p = a->next;
+                 p != NULL;
+                 prev = p, p = p->next) 
+            { 
+                if (bbox_overlap(p->bbox, b[i].bbox))
+                {   
+
+                    /* kill or split the Asteroid */
+                    if (prev) {
+                        prev->next = p->next;
+                        free(p);
+                        *asteroid_num -= 1;
                     }
+                    
+                    /* kill the blast */
+                    b[i].live = 0;
+                    
+                    /* bang */
+                    al_play_sample(bang, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+
+                    /* increse the score */
                 }
+                
             }
         }
     }
+
 }

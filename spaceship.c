@@ -13,18 +13,18 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_audio.h>
 #include "spaceship.h"
+#include "misc.h"
 
-
-void ship_init(Spaceship* s, int x, int y) {
-    s->sx = x;
-    s->sy = y;
+void ship_init(Spaceship *s) {
+    s->sx = SCREEN_WIDTH/2;
+    s->sy = SCREEN_HEIGHT/2;
     s->heading = 0;
     s->speed = 0;
     s->lives = 3;
     s->accelerating = 0;
     s->color = al_map_rgb(0, 255, 255);  
-    s->bbox.center.x = x;
-    s->bbox.center.y = y;
+    s->bbox.center.x = SCREEN_WIDTH/2;
+    s->bbox.center.y = SCREEN_HEIGHT/2;
     s->bbox.left = 10;
     s->bbox.right = 10;
     s->bbox.top= 12;
@@ -54,20 +54,20 @@ void ship_draw(Spaceship s) {
 }
 
 
-void ship_move(Spaceship* s, int width, int height) {
+void ship_move(Spaceship *s) {
 
     s->sy -= s->speed * cos(s->heading);
     s->sx += s->speed * sin(s->heading);
     
     /* loop boundary */
     if (s->sy < 0)
-        s->sy += height;
-    if (s->sy > height)
-        s->sy -= height;
+        s->sy += SCREEN_WIDTH;
+    if (s->sy > SCREEN_HEIGHT)
+        s->sy -= SCREEN_HEIGHT;
     if (s->sx < 0)
-        s->sx += width;
-    if (s->sx > width) 
-        s->sx -= width;
+        s->sx += SCREEN_WIDTH;
+    if (s->sx > SCREEN_WIDTH) 
+        s->sx -= SCREEN_WIDTH;
 
     /* move and rotate the bounding box */
     s->bbox.center.x = s->sx;
@@ -75,7 +75,7 @@ void ship_move(Spaceship* s, int width, int height) {
     s->bbox.heading = s->heading;
 }
 
-void ship_acc(Spaceship* s, ALLEGRO_SAMPLE* thrust) {
+void ship_acc(Spaceship *s, ALLEGRO_SAMPLE *thrust) {
     s->speed += SHIP_SPEEDUP;
     if (s->speed > MAX_SHIP_SPEED)
         s->speed = MAX_SHIP_SPEED;
@@ -83,17 +83,17 @@ void ship_acc(Spaceship* s, ALLEGRO_SAMPLE* thrust) {
 }
 
 
-void ship_slowndown(Spaceship* s) {
+void ship_slowndown(Spaceship *s) {
     s->speed -= SHIP_SPEEDUP;
     if (s->speed < MIN_SHIP_SPEED)
         s->speed = MIN_SHIP_SPEED;
 }
 
-void ship_turn_right(Spaceship* s) {
+void ship_turn_right(Spaceship *s) {
     s->heading += SHIP_ROTATE_ANGLE;
 }
 
-void ship_turn_left(Spaceship* s) {
+void ship_turn_left(Spaceship *s) {
     s->heading -= SHIP_ROTATE_ANGLE;
 }
 

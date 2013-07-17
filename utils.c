@@ -10,7 +10,7 @@
 #include <math.h>
 #include "utils.h"
 
-void point_rotate(Point* p, Point center, float theta) {
+void point_rotate(Point *p, Point center, float theta) {
     
    
 

@@ -12,6 +12,8 @@
 #define UTILS_H_
 
 
+
+
 typedef struct {
     float x;
     float y;
@@ -19,7 +21,7 @@ typedef struct {
 
 
 
-
+float random_float(float range);
 void point_rotate(Point *p, Point center, float theta);
 Point project(Point A, Point B);
 float dot_product(Point A, Point B);

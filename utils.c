@@ -7,8 +7,14 @@
  *
  */
 
+#include <stdlib.h>
 #include <math.h>
 #include "utils.h"
+
+
+float random_float(float range) {
+    return (float)rand() / ((float)RAND_MAX / range);
+}
 
 void point_rotate(Point *p, Point center, float theta) {
     

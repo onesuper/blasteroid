@@ -102,12 +102,18 @@ void blast_collide(Blast b[], int b_size, Asteroid *a, ALLEGRO_SAMPLE *bang, int
                 if (bbox_overlap(p->bbox, b[i].bbox))
                 {   
 
-                    /* kill or split the Asteroid */
+                    
+                    /* split it into two parts */
+                    if (asteroid_split(p))
+                        *asteroid_num += 2;   /* if succeed? */
+                    
+
+                    /* kill it anyway */
                     if (prev) {
                         prev->next = p->next;
                         free(p);
                         *asteroid_num -= 1;
-                    }
+                    }                   
                     
                     /* kill the blast */
                     b[i].live = 0;

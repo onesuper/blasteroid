@@ -7,16 +7,15 @@
  *
  */
 
-#include <math.h>
+
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_audio.h>
 #include "asteroid.h"
 #include "misc.h"
+#include <math.h>
 
 int asteroid_points[3] = {20, 50, 100};
-float asteroid_scale[3] = {1.5, 1.25, 1.0}; 
-enum ASTEROID_TYPE {LARGE, MEDIUM, SMALL};
-
+float asteroid_scale[3] = {1.25, 0.9, 0.4}; 
 
 
 /*
@@ -32,18 +31,18 @@ Asteroid *asteroid_init() {
 /*
  * Give birth to a asteroid
  */
-Asteroid *asteroid_create() {
+Asteroid *asteroid_create(int type) {
 
     Asteroid *a = malloc(sizeof(Asteroid));
 
     a->sx = 30;
     a->sy = 30 + rand() % (SCREEN_HEIGHT -60);
-    a->speed =0.5;
+    a->speed =0.5 + random_float(0.5);
     a->rot_velocity = 0.01;
-    a->heading = (float)rand()/((float)RAND_MAX/10.0);
-    a->twist = (float)rand()/((float)RAND_MAX/10.0);
-    a->type = LARGE;                    /* large rocks at the beginning */ 
-    a->scale = asteroid_scale[LARGE];
+    a->heading = random_float(10.0);
+    a->twist = random_float(10.0);
+    a->type = type;                    /* large rocks at the beginning */ 
+    a->scale = asteroid_scale[type];
     a->color = al_map_rgb(220,220,220);
     a->bbox.top = 20 * a->scale; 
     a->bbox.bottom = 20 * a->scale;
@@ -60,15 +59,15 @@ Asteroid *asteroid_create() {
 
 
 /*
- * Append n asteroids to the head of list
+ * fill a list with n LARGE Asteroids
  */
-void asteroid_append(Asteroid *head, int n) {
-   
+void asteroid_fill_list(Asteroid *a, int n) {
+    Asteroid *new;
     int i;
     for (i = 0; i < n; i++) {        
-        Asteroid *new = asteroid_create();
-        new->next = head->next;
-        head->next = new;
+        new = asteroid_create(LARGE);
+        new->next = a->next;
+        a->next = new;
     }
 
 }
@@ -171,4 +170,32 @@ void asteroid_collide(Asteroid *a, Spaceship *s, ALLEGRO_SAMPLE *bang, int *aste
 }
 
 
+/*
+ * it returns whether the asteroid split
+ */
+int asteroid_split(Asteroid *a) {
+    
+    if (a->type == LARGE) {
+        Asteroid *new1 = asteroid_create(MEDIUM);
+        Asteroid *new2 = asteroid_create(MEDIUM);
+        new1->sx = new2->sx = a->sx;
+        new1->sy = new2->sy = a->sy;
+        new1->next = new2;
+        new2->next = a->next;
+        a->next = new1;
+        return 1;
+        
+    } else if (a->type == MEDIUM) {
+        Asteroid *new1 = asteroid_create(SMALL);
+        Asteroid *new2 = asteroid_create(SMALL);
+        new1->sx = new2->sx = a->sx;
+        new1->sy = new2->sy = a->sy;
+        new1->next = new2;
+        new2->next = a->next;
+        a->next = new1;
+        return 1;
+    } else {
+        return 0;  /* too SMALL to split */
+    }   
+}
 

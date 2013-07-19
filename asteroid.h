@@ -31,14 +31,15 @@ typedef struct asteroid_t{
     struct asteroid_t *next;
 } Asteroid;
 
-
+enum ASTEROID_TYPE {LARGE, MEDIUM, SMALL};
 
 Asteroid *asteroid_init(void);
-Asteroid *asteroid_create(void);
-void asteroid_append(Asteroid *a, int n);
+Asteroid *asteroid_create(int type);
+void asteroid_fill_list(Asteroid *a, int n);
 void asteroid_destroy(Asteroid *a);
 void asteroid_move(Asteroid *a);
 void asteroid_draw(Asteroid *a);
 void asteroid_collide(Asteroid *a, Spaceship *s, ALLEGRO_SAMPLE *bang, int *asteroid_num);
+int asteroid_split(Asteroid *a);
 
 #endif

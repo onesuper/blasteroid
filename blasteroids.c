@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
     blast_init(blasts_array, MAX_BLAST_NUM);
 
     Asteroid *asteroids_list = asteroid_init();
-    asteroid_append(asteroids_list, 4);
+    asteroid_fill_list(asteroids_list, 4);
 
 
 
@@ -195,11 +195,10 @@ int main(int argc, char **argv) {
             asteroid_collide(asteroids_list, &ship, sound_bang, &asteroid_num);      
             blast_collide(blasts_array, MAX_BLAST_NUM, asteroids_list, sound_bang, &score, &asteroid_num);                    
 
-            /* Main Game Logic */
 
-            if (asteroid_num == 0) {
-                
-                asteroid_append(asteroids_list, 4);
+            /* Main Game Logic */
+            if (asteroid_num == 0) {                
+                asteroid_fill_list(asteroids_list, 4); /* refill the list */
                 asteroid_num += 4;
             }
 

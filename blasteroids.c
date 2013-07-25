@@ -18,6 +18,8 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include "spaceship.h"
 #include "asteroid.h"
 #include "blast.h"
@@ -30,7 +32,7 @@
 /* 5 keys for controlling the spaceship */
 int keys[5] = {0, 0, 0, 0, 0};
 enum KEYS {UP, DOWN, LEFT, RIGHT, SPACE};
-
+char display_score[20];
 
 int main(int argc, char **argv) {
 
@@ -42,6 +44,8 @@ int main(int argc, char **argv) {
     ALLEGRO_SAMPLE *sound_fire = NULL;
     ALLEGRO_SAMPLE *sound_bang = NULL;
     ALLEGRO_SAMPLE *sound_thrust = NULL;
+    ALLEGRO_FONT *font_arial_36 = NULL;
+    ALLEGRO_FONT *font_arial_24 = NULL;
     int redraw = 1;
     int doexit = 0;
     int score = 0;
@@ -61,10 +65,19 @@ int main(int argc, char **argv) {
         return -1;
     }
     
-    if(!al_init_acodec_addon()) {
+    if (!al_init_acodec_addon()) {
         fprintf(stderr, "failed to initialize audio codecs!\n");
         return -1;
     }
+
+    al_init_font_addon();
+
+
+    if (!al_init_ttf_addon()) {
+        fprintf(stderr, "failed to initialize ttf addon!\n");
+        return -1;
+    }
+
 
     /* Install keyboard */
     if (!al_install_keyboard()) {
@@ -73,8 +86,9 @@ int main(int argc, char **argv) {
     }
 
 
+
     /***********************************************************************
-     *   Game audio
+     *   Game Audio/Font Loading
      **********************************************************************/
     if (!al_install_audio()){
         fprintf(stderr, "failed to install audio!\n");
@@ -104,6 +118,17 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    font_arial_36 = al_load_ttf_font("arial.ttf", 36, 0);
+    if (!font_arial_36){
+        fprintf(stderr, "arial 36 not loaded!\n" ); 
+        return -1;
+    }
+
+    font_arial_24 = al_load_ttf_font("arial.ttf", 24, 0);
+    if (!font_arial_24){
+        fprintf(stderr, "arial 24 not loaded!\n" ); 
+        return -1;
+    }
 
     /* Get a timer */
     timer = al_create_timer(1.0 / FPS);
@@ -140,6 +165,9 @@ int main(int argc, char **argv) {
 
     /* Set background black */
     al_clear_to_color(al_map_rgb(0, 0, 0));
+
+    
+
     al_flip_display();
   
 
@@ -201,6 +229,8 @@ int main(int argc, char **argv) {
                 asteroid_fill_list(asteroids_list, 4); /* refill the list */
                 asteroid_num += 4;
             }
+
+
 
        
         } else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {  /* close */
@@ -269,8 +299,61 @@ int main(int argc, char **argv) {
                     bbox_draw(blasts[i].bbox);
             }
 #endif
+
+            /* 
+             * Display Score/Life
+             */
+            sprintf(display_score, "%d", score);
+
+            ALLEGRO_TRANSFORM transform;
+            al_identity_transform(&transform);
+            al_use_transform(&transform);
+            al_draw_text(font_arial_24, al_map_rgb(200,200,200), 50, 10, ALLEGRO_ALIGN_CENTRE, display_score);
+
+
+            if (ship.lives >= 1) {
+                al_identity_transform(&transform);
+                al_rotate_transform(&transform, 0);
+                al_translate_transform(&transform, 30, 60);
+                al_use_transform(&transform);
+                al_draw_line(-8,   9,  0, -11, al_map_rgb(200,200,200), 3.0f);
+                al_draw_line( 0, -11,  8,   9, al_map_rgb(200,200,200), 3.0f);
+                al_draw_line(-6,   4, -1,   4, al_map_rgb(200,200,200), 3.0f);
+                al_draw_line( 6,   4,  1,   4, al_map_rgb(200,200,200), 3.0f);
+            }
+
+            if (ship.lives >= 2) {
+                al_identity_transform(&transform);
+                al_rotate_transform(&transform, 0);
+                al_translate_transform(&transform, 50, 60);
+                al_use_transform(&transform);
+                al_draw_line(-8,   9,  0, -11, al_map_rgb(200,200,200), 3.0f);
+                al_draw_line( 0, -11,  8,   9, al_map_rgb(200,200,200), 3.0f);
+                al_draw_line(-6,   4, -1,   4, al_map_rgb(200,200,200), 3.0f);
+                al_draw_line( 6,   4,  1,   4, al_map_rgb(200,200,200), 3.0f);
+            }
+
+            if (ship.lives >= 3) {
+                al_identity_transform(&transform);
+                al_rotate_transform(&transform, 0);
+                al_translate_transform(&transform, 70, 60);
+                al_use_transform(&transform);
+                al_draw_line(-8,   9,  0, -11, al_map_rgb(200,200,200), 3.0f);
+                al_draw_line( 0, -11,  8,   9, al_map_rgb(200,200,200), 3.0f);
+                al_draw_line(-6,   4, -1,   4, al_map_rgb(200,200,200), 3.0f);
+                al_draw_line( 6,   4,  1,   4, al_map_rgb(200,200,200), 3.0f);
+            }
+
+
+            if (ship.lives == 0) {
+                al_identity_transform(&transform);
+                al_use_transform(&transform);
+                al_draw_text(font_arial_36, al_map_rgb(200,200,200), SCREEN_WIDTH/2, SCREEN_HEIGHT/2-100, ALLEGRO_ALIGN_CENTRE, "GAME OVER");
+            }
+
             al_flip_display();
             al_clear_to_color(al_map_rgb(0, 0, 0));
+
         }
     }
 

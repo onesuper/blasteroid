@@ -42,6 +42,6 @@ void ship_acc(Spaceship *s, ALLEGRO_SAMPLE *thrust);
 void ship_slowndown(Spaceship *s);
 void ship_turn_right(Spaceship *s);
 void ship_turn_left(Spaceship *s);
-
+void ship_damage(Spaceship *s);
 
 #endif

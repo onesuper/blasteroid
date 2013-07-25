@@ -18,6 +18,9 @@
 #include "blast.h"
 #include "misc.h"
 
+int asteroid_points[3] = {20, 50, 100};
+
+
 void blast_init(Blast b[], int size) {
     int i;
     for (i = 0; i < size; i++) {
@@ -32,6 +35,10 @@ void blast_init(Blast b[], int size) {
 }
 
 void blast_fire(Blast b[], int size, Spaceship *s, ALLEGRO_SAMPLE *fire) {
+
+    if (s->lives < 1)
+        return;
+
     int i;
     for (i = 0; i < size; i++) {
         if (!b[i].live) {
@@ -101,6 +108,9 @@ void blast_collide(Blast b[], int b_size, Asteroid *a, ALLEGRO_SAMPLE *bang, int
             { 
                 if (bbox_overlap(p->bbox, b[i].bbox))
                 {   
+                    
+                    
+                    *score += asteroid_points[p->type];
 
                     
                     /* split it into two parts */
@@ -121,7 +131,8 @@ void blast_collide(Blast b[], int b_size, Asteroid *a, ALLEGRO_SAMPLE *bang, int
                     /* bang */
                     al_play_sample(bang, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 
-                    /* increse the score */
+                    /* add score */
+                    
                 }
                 
             }

@@ -33,14 +33,18 @@ void ship_init(Spaceship *s) {
     s->bbox.color = al_map_rgb(255, 255, 255);  
 }
 
+
 void ship_draw(Spaceship s) {
-    
+
+    if (s.lives <= 1)
+        return;
+
     ALLEGRO_TRANSFORM transform;
     al_identity_transform(&transform);
     al_rotate_transform(&transform, s.heading);
     al_translate_transform(&transform, s.sx, s.sy);
     al_use_transform(&transform);
-    
+        
     al_draw_line(-8,   9,  0, -11, s.color, 3.0f);
     al_draw_line( 0, -11,  8,   9, s.color, 3.0f);
     al_draw_line(-6,   4, -1,   4, s.color, 3.0f);
@@ -54,7 +58,23 @@ void ship_draw(Spaceship s) {
 }
 
 
+
+void ship_damage(Spaceship *s) {
+
+    s->lives--;
+
+    if (s->lives > 0) {
+        s->sx = SCREEN_WIDTH / 2;
+        s->sy = SCREEN_HEIGHT / 2;
+        s->heading = 0;
+        s->speed = 0;
+    }
+}
+
 void ship_move(Spaceship *s) {
+
+    if (s->lives < 1)
+        return;
 
     s->sy -= s->speed * cos(s->heading);
     s->sx += s->speed * sin(s->heading);

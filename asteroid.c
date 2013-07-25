@@ -14,7 +14,7 @@
 #include "misc.h"
 #include <math.h>
 
-int asteroid_points[3] = {20, 50, 100};
+
 float asteroid_scale[3] = {1.25, 0.9, 0.4}; 
 
 
@@ -37,7 +37,7 @@ Asteroid *asteroid_create(int type) {
 
     a->sx = 30;
     a->sy = 30 + rand() % (SCREEN_HEIGHT -60);
-    a->speed =0.5 + random_float(0.5);
+    a->speed =0.5 + random_float(1.5);
     a->rot_velocity = 0.01;
     a->heading = random_float(10.0);
     a->twist = random_float(10.0);
@@ -143,6 +143,9 @@ void asteroid_draw(Asteroid *a) {
 
 void asteroid_collide(Asteroid *a, Spaceship *s, ALLEGRO_SAMPLE *bang, int *asteroid_num) {
 
+    if (s->lives < 1) 
+        return;
+
     Asteroid *prev, *p;
 
     for (prev = a, p = a->next;
@@ -159,7 +162,7 @@ void asteroid_collide(Asteroid *a, Spaceship *s, ALLEGRO_SAMPLE *bang, int *aste
             }
 
             /* kill the spaceship */
-            s->lives--;
+            ship_damage(s);
 
             /* bang */
             al_play_sample(bang, 1, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);

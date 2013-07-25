@@ -1,6 +1,6 @@
 CXX=gcc
 CFLAGS=-Wall -g
-LDFLAGS=-L/usr/lib -lallegro -lallegro_primitives -lallegro_audio -lallegro_acodec -lallegro_main 
+LDFLAGS=-L/usr/lib -lallegro -lallegro_primitives -lallegro_audio -lallegro_acodec -lallegro_font -lallegro_ttf -lallegro_main 
 LDFLAGS1=-L/usr/lib -lallegro -lallegro_primitives 
 INCLUDE=-I. -I/usr/include/allegro5 
 
